@@ -31,6 +31,8 @@ class edge
   int v_original;
 
 };
+void select_smallest(vector<list<edge> > &adjA,
+                vector<list<edge> > &adjB, int median_weight);
 void MBST( vector<list<edge> > &adjA,
                 vector<list<edge> > &adjD);
 void collect_weights(vector<list<edge> > &adjA, vector<int> &weights);
@@ -57,10 +59,6 @@ int main()
     else
       cout << "Not a valid edge" << endl;
   }
-  //we have to collect weights into array A
-
-  //we have to find median m of A->use select
-  //collects edges with w<=m
   //Run BFS. is H connected? Yes, call camerini on H
   //No, collapse G into G' and recursively call camerini on G'
   //^^^^all this in MBST File
@@ -171,6 +169,25 @@ void MBST( vector<list<edge> > &adjA,
         }//else not connected
 }//MBST recursive
 
+void select_smallest(vector<list<edge> > &adjA,
+                vector<list<edge> > &adjB, int median_weight)
+{
+  int size=adjA.size();
+  for(int u=0;u<size;u++)
+  {
+    list<edge>::iterator i=adjA[u].begin();
+    while(i != adjA[u].end())
+    {
+      if(i->getW() <= median_weight)
+      {
+        adjB[u].push_front((*i));//copy edge from A to B
+        i=adjA[u].erase(i);//erase edge from A, return iterator at new edge
+      }
+      else
+        i++;
+    }
+  }
+}
 
 void collect_weights(vector<list<edge> > &adjA, vector<int> &weights)
 {
