@@ -33,6 +33,7 @@ class edge
 };
 void MBST( vector<list<edge> > &adjA,
                 vector<list<edge> > &adjD);
+void collect_weights(vector<list<edge> > &adjA, vector<int> &weights);
 int select(vector<int> &v, int start, int fin, int k);
 int main()
 {
@@ -81,6 +82,9 @@ void MBST( vector<list<edge> > &adjA,
         m = m >> 1;//divide by 2, each edge occurs twice in Adj
         //BASE case, if number of edges is 1, return
         //after adding the first edge to adjD
+
+        //Here you need to add edge to adjD
+        //from adjA (add original name of the edge)
         if(m == 1){
             for(int u=0; u<size;u++)
             {
@@ -95,6 +99,9 @@ void MBST( vector<list<edge> > &adjA,
                 break;
               }
             }
+
+            return;
+        }
 
         /***********   Collect weights of edges **********/
         vector<int> weights(m, 0);
@@ -164,6 +171,23 @@ void MBST( vector<list<edge> > &adjA,
         }//else not connected
 }//MBST recursive
 
+
+void collect_weights(vector<list<edge> > &adjA, vector<int> &weights)
+{
+  int size=adjA.size();
+  int index=0;
+  for(int u=0;u<size;u++)
+  {
+    for(list<edge>::iterator i=adjA[u].begin(); i != adjA[u].end();i++)
+    {
+      if(u < i->getV())
+      {
+        weights[index]=i->getW();
+        index++;
+      }
+    }
+  }
+}
 
 /***********************************************************/
 
