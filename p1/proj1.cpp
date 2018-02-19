@@ -21,9 +21,9 @@ class edge
   {v=V;w=W;u_original=uOrigin;v_original=vOrigin;}
   int getV(){return v;}
   int getW(){return w;}
+  void setV(int s){v=s;}
   int getU_origin(){return u_original;}
   int getV_origin(){return v_original;}
-
   private:
   int v;
   int w;
@@ -35,6 +35,9 @@ void select_smallest(vector<list<edge> > &adjA,
                 vector<list<edge> > &adjB, int median_weight);
 void MBST( vector<list<edge> > &adjA,
                 vector<list<edge> > &adjD);
+void BFS(vector<list<edge> > &adjB, int source,
+                            short int component,vector<short int> &cc);
+int connected(vector<list<edge> > &adjB, vector<short int> &cc);
 void collect_weights(vector<list<edge> > &adjA, vector<int> &weights);
 int select(vector<int> &v, int start, int fin, int k);
 int main()
@@ -168,6 +171,55 @@ void MBST( vector<list<edge> > &adjA,
                 return;
         }//else not connected
 }//MBST recursive
+
+
+int connected(vector<list<edge> > &adjB, vector<short int> &cc)
+{
+  //will call BFS on indexes from vector cc
+  short int component=0;
+  int flag=1;//flag will be used to stop loop of BFS
+  for(int i=0;i<cc.size();i++)
+  {
+    cc[i]=-1;//sentinel value
+  }
+
+  for(int i=0;i<cc.size();i++)
+  {
+    if(cc[i]==-1)
+    {
+      BFS(adjB,i,component,cc);
+      component++;
+    }
+  }
+  return component;
+}
+
+void BFS(vector<list<edge> > &adjB, int source,
+            short int component,vector<short int> &cc)
+{
+
+  list<int> q;
+  cc[source]=component;
+  q.push_back(source);
+  while(q.empty() != true)
+  {
+    source=q.front();
+    q.pop_front();
+
+    for(list<edge>::iterator it=adjB[source].begin();it != adjB[source].end();++it)
+    {
+      int v=it->getV_origin();
+      if(cc[v]==-1)
+      {
+        cc[v]=component;
+        q.push_back(v);
+      }
+    }
+
+  }
+
+}
+
 
 void select_smallest(vector<list<edge> > &adjA,
                 vector<list<edge> > &adjB, int median_weight)
