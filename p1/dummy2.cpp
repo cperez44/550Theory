@@ -236,13 +236,28 @@ void MBST( vector<list<edge> > &adjA,
                 construct adjC from adjA and
                 super vertices (each represents a
                 connected component)
+                */
+            vector< list<edge> > adjC(adjA.size());
+            for(int i=0;i<adjA.size();i++)
+            {
+              for(list<edge>::iterator it=adjA[i].begin();it != adjA[i].end();
+                    ++it)
+              {
+                int u=getU_origin();
+                int v=getV_origin();
+                adjC[i]
+              }
+            }
+
+                /*
 
                 Rename edges according to the names
                 of new supervertices (0, 1,.., total_cc-1)
                 call recursively MBST on adjC:
+                */
 
-				MBST(adjC, adjD);
-
+				//MBST(adjC, adjD);
+                /*
                 When call returns,
                 Add edges of adjB (use original names)
                 into adjD
@@ -258,9 +273,8 @@ void MBST( vector<list<edge> > &adjA,
 
 
                 }
+                */
 
-
-            *****************************************/
 
                 return;
         }//else not connected
