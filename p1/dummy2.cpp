@@ -81,7 +81,14 @@ int main()
   }
 
   MBST(tempA,tempD);
-  //printList(tempD,N);
+  cout << "---------------------" << endl;
+  cout << "comparing adjD & adjA" << endl;
+  cout << endl;
+  cout << endl;
+  cout << "adjA: " << endl;
+  printList(adjList,N);
+  cout << "adjD: " << endl;//final
+  printList(tempD,N);
   return 0;
 }
 
@@ -155,16 +162,13 @@ void MBST( vector<list<edge> > &adjA,
         if(m == 1){
             for(int u=0; u<size;u++)
             {
-              if(adjA[u].size() != 0 )
+              for(list<edge>::iterator it = adjA[u].begin();
+                  it != adjA[u].end();++it)
               {
-                list<edge>::iterator it=adjA[u].begin();
                 it->setV(it->getV_origin());
-                adjD[u].push_front(*it);//add edge(u,v)
+                int i=it->getU_origin();
+                adjD[i].push_front(*it);//add edge(u,v)
 
-                int v=it->getV();
-                it=adjA[v].begin();
-                adjD[v].push_front(*it);//add edge(v,u)
-                break;
               }
             }
             //Here you need to add edge to adjD
@@ -227,6 +231,9 @@ void MBST( vector<list<edge> > &adjA,
         ****************************************/
 
         if(total_cc == 1){
+          cout << endl;
+          cout << "-----> connected (only one component) -> calling MBST(adjB,adjD)" << endl;
+          cout << endl;
                 MBST(adjB, adjD);
                 return;
         }else{
@@ -237,17 +244,29 @@ void MBST( vector<list<edge> > &adjA,
                 super vertices (each represents a
                 connected component)
                 */
-            vector< list<edge> > adjC(adjA.size());
+            cout << "-----> not connected -> contracting connected components, constructing adjC from adjA" <<endl;
+            vector< list<edge> > adjC(total_cc);
             for(int i=0;i<adjA.size();i++)
             {
               for(list<edge>::iterator it=adjA[i].begin();it != adjA[i].end();
                     ++it)
               {
-                int u=getU_origin();
-                int v=getV_origin();
-                adjC[i]
+                cout << "for W= " << it->getW() << endl;
+                int u=i;
+                cout << "u= " << u << endl;
+                int v=it->getV();
+                cout << "v= " << v << endl;
+                cout << "----" << endl;
+ 		            u=cc[u];
+		            v=cc[v];
+		            it->setV(v);
+                adjC[u].push_back(*it);
               }
             }
+	           cout << "adjC: -----------------------" << endl;
+	           printList(adjC, adjC.size());
+             cout << endl;
+             cout << "calling MBST(adjC,adjD)" << endl;
 
                 /*
 
@@ -256,24 +275,31 @@ void MBST( vector<list<edge> > &adjA,
                 call recursively MBST on adjC:
                 */
 
-				//MBST(adjC, adjD);
+		              MBST(adjC, adjD);
                 /*
                 When call returns,
                 Add edges of adjB (use original names)
                 into adjD
+		             */
+                cout << endl;
+                cout << "call returned for MBST(adjC,adjD)" << endl;
+                cout << "adjD: -------------------" << endl;
+                printList(adjD, adjD.size());
+                cout << "adding edges of adjB(use original names) to adjD" << endl;
 
                 for(int u=0; u<size;u++)
                 {
                   for(list<edge>::iterator it=adjB[u].begin();
                     it != adjB[u].end();++it)
                   {
-                    it->setV();//sets v to original name
-                    it->setV=it->getV_origin;
+		                  int i=it->getU_origin();
+		                  int v=it->getV_origin();
+                      it->setV(v);//sets v to original name
+                      adjD[i].push_back(*it);
                   }
-
-
                 }
-                */
+
+
 
 
                 return;
@@ -313,7 +339,7 @@ void collect_weights(vector<list<edge> > &adjA, vector<int> &weights)
   {
     for(list<edge>::iterator i=adjA[u].begin(); i != adjA[u].end();i++)
     {
-      if(u > i->getV_origin())
+      if(u > i->getV())
       {
         weights[index]=i->getW();
         index++;
@@ -430,7 +456,8 @@ void printList(vector<list<edge> > &adjList, int N)
       cout << i << ": ";
       for(list<edge>::iterator it =adjList[i].begin(); it !=adjList[i].end();it++)
       {
-        cout <<(*it).getW() <<"(" << (*it).getU_origin()<< ","<<(*it).getV() << "), ";
+        cout <<(*it).getW() <<"(u=" << i <<", v=" << (*it).getV() << ", uO="
+         << (*it).getU_origin()<< ", vO="<<(*it).getV_origin() << "), ";
       }
       cout << endl;
     }
