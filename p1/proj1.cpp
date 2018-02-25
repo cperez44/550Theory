@@ -152,7 +152,7 @@ void MBST( vector<list<edge> > &adjA,
                 return;
         }else{
 	          vector< list<edge> > adjC(total_cc);
-            for(int i=0;i<adjA.size();i++)
+            for(unsigned int i=0;i<adjA.size();i++)
             {
               for(list<edge>::iterator it=adjA[i].begin();it != adjA[i].end();
                     ++it)
@@ -201,7 +201,7 @@ void MBST( vector<list<edge> > &adjA,
 int Longest(vector<list<edge> > &adjD)
 {
   int L=0;
-  for(int i=0;i<adjD.size();i++)
+  for(unsigned int i=0;i<adjD.size();i++)
   {
     for(list<edge>::iterator it=adjD[i].begin();
         it != adjD[i].end();++it)
@@ -217,13 +217,12 @@ int connected(vector<list<edge> > &adjB, vector<short int> &cc)
 {
   //will call BFS on indexes from vector cc
   short int component=0;
-  int flag=1;//flag will be used to stop loop of BFS
-  for(int i=0;i<cc.size();i++)
+  for(unsigned int i=0;i<cc.size();i++)
   {
     cc[i]=-1;//sentinel value
   }
 
-  for(int i=0;i<cc.size();i++)
+  for(unsigned int i=0;i<cc.size();i++)
   {
     if(cc[i]==-1)
     {
