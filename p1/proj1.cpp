@@ -33,6 +33,7 @@ class edge
 };
 void MBST( vector<list<edge> > &adjA,
                 vector<list<edge> > &adjD);
+int Longest(vector<list<edge> > &adjD);
 void select_smallest(vector<list<edge> > &adjA,
                 vector<list<edge> > &adjB, int median_weight, int m);
 void BFS(vector<list<edge> > &adjB, int source,
@@ -45,9 +46,11 @@ int main()
   int N,M;
   int x,y,w;
   vector<list<edge> > adjList;
+  vector<list<edge> > mbst;
   cin >> N;
   cin >> M;
   adjList.resize(N);
+  mbst.resize(N);
   for(int i=0;i<M;i++)
   {
     cin >> x;
@@ -65,8 +68,8 @@ int main()
   //Run BFS. is H connected? Yes, call camerini on H
   //No, collapse G into G' and recursively call camerini on G'
   //^^^^all this in MBST File
-  MBST(adjList);
-
+  MBST(adjList,mbst);
+  cout << Longest(mbst) << endl;
 
   return 0;
 }
@@ -195,7 +198,20 @@ void MBST( vector<list<edge> > &adjA,
                 return;
         }//else not connected
 }//MBST recursive
-
+int Longest(vector<list<edge> > &adjD)
+{
+  int L=0;
+  for(int i=0;i<adjD.size();i++)
+  {
+    for(list<edge>::iterator it=adjD[i].begin();
+        it != adjD[i].end();++it)
+    {
+      if(it->getW() > L)
+        L=it->getW();
+    }
+  }
+  return L;
+}
 
 int connected(vector<list<edge> > &adjB, vector<short int> &cc)
 {
