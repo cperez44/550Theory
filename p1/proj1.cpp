@@ -31,12 +31,12 @@ class edge
   int v_original;
 
 };
-void select_smallest(vector<list<edge> > &adjA,
-                vector<list<edge> > &adjB, int median_weight);
 void MBST( vector<list<edge> > &adjA,
                 vector<list<edge> > &adjD);
+void select_smallest(vector<list<edge> > &adjA,
+                vector<list<edge> > &adjB, int median_weight, int m);
 void BFS(vector<list<edge> > &adjB, int source,
-                            short int component,vector<short int> &cc);
+                short int component,vector<short int> &cc);
 int connected(vector<list<edge> > &adjB, vector<short int> &cc);
 void collect_weights(vector<list<edge> > &adjA, vector<int> &weights);
 int select(vector<int> &v, int start, int fin, int k);
@@ -65,6 +65,7 @@ int main()
   //Run BFS. is H connected? Yes, call camerini on H
   //No, collapse G into G' and recursively call camerini on G'
   //^^^^all this in MBST File
+  MBST(adjList);
 
 
   return 0;
@@ -89,15 +90,12 @@ void MBST( vector<list<edge> > &adjA,
         if(m == 1){
             for(int u=0; u<size;u++)
             {
-              if(adjA[u].size() != 0 )
+              for(list<edge>::iterator it = adjA[u].begin();
+                  it != adjA[u].end();++it)
               {
-                list<edge>::iterator it=adjA[u].begin();
-                adjD[u].push_front(*it);//add edge(u,v)
-
-                int v=it->getV();
-                it=adjA[v].begin();
-                adjD[v].push_front(*it);//add edge(v,u)
-                break;
+                it->setV(it->getV_origin());
+                int i=it->getU_origin();
+                adjD[i].push_front(*it);//add edge(u,v)
               }
             }
 
@@ -128,7 +126,7 @@ void MBST( vector<list<edge> > &adjA,
         vector< list<edge> > adjB(adjA.size());//smallest edges
 
         //You need to write this function:
-        select_smallest(adjA, adjB, median_weight);
+        select_smallest(adjA, adjB, median_weight, m);
 
 
         /******* Find connected components in adjB
@@ -150,8 +148,23 @@ void MBST( vector<list<edge> > &adjA,
                 MBST(adjB, adjD);
                 return;
         }else{
-
-            /******     If not connected,
+	          vector< list<edge> > adjC(total_cc);
+            for(int i=0;i<adjA.size();i++)
+            {
+              for(list<edge>::iterator it=adjA[i].begin();it != adjA[i].end();
+                    ++it)
+              {
+                int u=i;
+                int v=it->getV();
+ 		            u=cc[u];
+		            v=cc[v];
+                if(u != v){
+		              it->setV(v);
+                  adjC[u].push_back(*it);
+                }
+              }
+            }
+  /**   If not connected,
                 contract connected components
                 construct adjC from adjA and
                 super vertices (each represents a
@@ -161,12 +174,23 @@ void MBST( vector<list<edge> > &adjA,
                 of new supervertices (0, 1,.., total_cc-1)
                 call recursively MBST on adjC:
 
-				MBST(adjC, adjD);
-
                 When call returns,
                 Add edges of adjB (use original names)
                 into adjD
             *****************************************/
+            		MBST(adjC, adjD);//recursively call MBST on adjC
+
+                for(int u=0; u<size;u++)//add edges of adjB into adjD
+                {
+                  for(list<edge>::iterator it=adjB[u].begin();
+                    it != adjB[u].end();++it)
+                  {
+		                  int i=it->getU_origin();
+		                  int v=it->getV_origin();
+                      it->setV(v);//sets v to original name
+                      adjD[i].push_back(*it);
+                  }
+                }
 
                 return;
         }//else not connected
@@ -208,7 +232,7 @@ void BFS(vector<list<edge> > &adjB, int source,
 
     for(list<edge>::iterator it=adjB[source].begin();it != adjB[source].end();++it)
     {
-      int v=it->getV_origin();
+      int v=it->getV();
       if(cc[v]==-1)
       {
         cc[v]=component;
@@ -222,18 +246,36 @@ void BFS(vector<list<edge> > &adjB, int source,
 
 
 void select_smallest(vector<list<edge> > &adjA,
-                vector<list<edge> > &adjB, int median_weight)
+                vector<list<edge> > &adjB, int median_weight,int m)
 {
   int size=adjA.size();
+  if(m%2 == 0)//if number of edges is even
+    m=m/2;
+  else
+    m=m/2 +1;
   for(int u=0;u<size;u++)
   {
     list<edge>::iterator i=adjA[u].begin();
     while(i != adjA[u].end())
     {
-      if(i->getW() <= median_weight)
+      if(median_weight >= i->getW() && m>0)
       {
         adjB[u].push_front((*i));//copy edge from A to B
+        int v= i->getV();
+        list<edge>::iterator tmp=adjA[v].begin();
+        while(tmp != adjA[v].end())
+        {
+          if(tmp->getV_origin()== i->getU_origin()
+            && tmp->getU_origin() == i->getV_origin())
+          {
+              adjB[v].push_front(*tmp);
+              tmp=adjA[v].erase(tmp);
+          }
+          else
+            tmp++;
+        }
         i=adjA[u].erase(i);//erase edge from A, return iterator at new edge
+        m--;
       }
       else
         i++;
