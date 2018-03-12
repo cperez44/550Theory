@@ -36,11 +36,12 @@ void printWeights(vector<int> &weights)
   }
   cout << endl;
 }
+int Longest(vector<list<edge> > &adjD);
 void BFS(vector<list<edge> > &adjB, int source,
             short int component,vector<short int> &cc);
 int connected(vector<list<edge> > &adjB, vector<short int> &cc);
 void select_smallest(vector<list<edge> > &adjA,
-                vector<list<edge> > &adjB, int median_weight);
+                vector<list<edge> > &adjB, int median_weight, int m);
 void collect_weights(vector<list<edge> > &adjA, vector<int> &weights);
 void MBST( vector<list<edge> > &adjA,
                 vector<list<edge> > &adjD);
@@ -89,7 +90,25 @@ int main()
   printList(adjList,N);
   cout << "adjD: " << endl;//final
   printList(tempD,N);
+
+  cout << endl;
+  cout << endl;
+  cout << "Longest = " << Longest(tempD) << endl;
   return 0;
+}
+int Longest(vector<list<edge> > &adjD)
+{
+  int L=0;
+  for(int i=0;i<adjD.size();i++)
+  {
+    for(list<edge>::iterator it=adjD[i].begin();
+        it != adjD[i].end();++it)
+    {
+      if(it->getW() > L)
+        L=it->getW();
+    }
+  }
+  return L;
 }
 
 int connected(vector<list<edge> > &adjB, vector<short int> &cc)
@@ -133,7 +152,7 @@ void BFS(vector<list<edge> > &adjB, int source,
 
     for(list<edge>::iterator it=adjB[source].begin();it != adjB[source].end();++it)
     {
-      int v=it->getV_origin();
+      int v=it->getV();
       if(cc[v]==-1)
       {
         cc[v]=component;
@@ -168,7 +187,6 @@ void MBST( vector<list<edge> > &adjA,
                 it->setV(it->getV_origin());
                 int i=it->getU_origin();
                 adjD[i].push_front(*it);//add edge(u,v)
-
               }
             }
             //Here you need to add edge to adjD
@@ -204,7 +222,7 @@ void MBST( vector<list<edge> > &adjA,
         vector< list<edge> > adjB(adjA.size());//smallest edges
 
         //You need to write this function:
-        select_smallest(adjA, adjB, median_weight);
+        select_smallest(adjA, adjB, median_weight, m);
         cout << "adjA ---------------------------" << endl;
         printList(adjA,adjA.size());
         cout << "adjB ---------------------------" << endl;
@@ -259,8 +277,10 @@ void MBST( vector<list<edge> > &adjA,
                 cout << "----" << endl;
  		            u=cc[u];
 		            v=cc[v];
-		            it->setV(v);
-                adjC[u].push_back(*it);
+                if(u != v){
+		              it->setV(v);
+                  adjC[u].push_back(*it);
+                }
               }
             }
 	           cout << "adjC: -----------------------" << endl;
@@ -311,18 +331,36 @@ void MBST( vector<list<edge> > &adjA,
 /***********************************************************/
 
 void select_smallest(vector<list<edge> > &adjA,
-                vector<list<edge> > &adjB, int median_weight)
+                vector<list<edge> > &adjB, int median_weight, int m)
 {
   int size=adjA.size();
+  if(m%2 == 0)//if number of edges is even
+    m=m/2;
+  else
+    m=m/2 +1;
   for(int u=0;u<size;u++)
   {
     list<edge>::iterator i=adjA[u].begin();
     while(i != adjA[u].end())
     {
-      if(i->getW() <= median_weight)
+      if(median_weight >= i->getW() && m>0)
       {
         adjB[u].push_front((*i));//copy edge from A to B
+        int v= i->getV();
+        list<edge>::iterator tmp=adjA[v].begin();
+        while(tmp != adjA[v].end())
+        {
+          if(tmp->getV_origin()== i->getU_origin()
+            && tmp->getU_origin() == i->getV_origin())
+          {
+              adjB[v].push_front(*tmp);
+              tmp=adjA[v].erase(tmp);
+          }
+          else
+            tmp++;
+        }
         i=adjA[u].erase(i);//erase edge from A, return iterator at new edge
+        m--;
       }
       else
         i++;

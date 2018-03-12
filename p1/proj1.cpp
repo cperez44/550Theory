@@ -62,8 +62,6 @@ int main()
       edge e2(x,w,y,x);
       adjList[y].push_front(e2);
     }
-    else
-      cout << "Not a valid edge" << endl;
   }
   //Run BFS. is H connected? Yes, call camerini on H
   //No, collapse G into G' and recursively call camerini on G'
