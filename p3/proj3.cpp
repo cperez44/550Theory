@@ -1,10 +1,10 @@
-
 #include <limits.h>
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
-void printB(const char *str,int B[],int index)
+void printB(const char *str,vector<int> B,int index)
 {
   //base case: if index >= 0
   if(index < 0){
@@ -25,10 +25,18 @@ void minPartition(const char *str, int n)
 //C[i]=number of cuts in the best palindrome parition
 //B[i]=holds the index k for the best choice of C[i]
 //P[i][j]=truth table for either a palindrome or not
+  vector<int> C(n);
+  vector<int> B(n);
+  vector<vector<int> > P(n);
+  for(int i=0;i<n;i++)
+  {
+    P[i].resize(n);
+  }
+  /*
 	int C[n];
   int B[n];
 	bool P[n][n];
-
+  */
 /********* Calculate table P   ***************/
 //P[i][j]=true if i=j
 	for (int i=0; i<n; i++)
