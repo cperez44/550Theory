@@ -4,6 +4,20 @@
 #include <string>
 using namespace std;
 
+void printB(const char *str,int B[],int index)
+{
+  //base case: if index >= 0
+  if(index < 0){
+    return;
+  }
+  printB(str,B,B[index]-1);
+  for(int i=index; i>=B[index];--i)
+  {
+    cout << str[i];
+  }
+  cout << endl;
+
+}
 //calculates table P,C, and B for a given string and a size
 void minPartition(const char *str, int n)
 {
@@ -67,7 +81,7 @@ void minPartition(const char *str, int n)
 		}
 	}
   /******  for debugging purposes, print tables  *******/
-  cout << "printing B and C: " << endl;
+  /*cout << "printing B and C: " << endl;
   for(int c=0;c<n;c++)
   {
     cout << B[c] << " ";
@@ -78,12 +92,12 @@ void minPartition(const char *str, int n)
     cout << C[c] << " ";
   }
   cout << endl;
-
+  */
 	// print the min cut value for str[0..n-1]
-	cout << C[n-1] << endl;
+  printB(str,B,n-1);
+	//cout << C[n-1] << endl;
 }
 
-//main
 int main()
 {
    // 1) reads string from standard input
