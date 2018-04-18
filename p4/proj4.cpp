@@ -6,37 +6,55 @@ using namespace std;
 
 void SAIS();
 
+void readFile(string filename,stringstream &ss);
+void convertToInts(stringstream &T);
+
+
 int main()
 {
-  /*******  read in input file using cin  *******/
+/********  read in input file using cin  *******/
   string filename;
-  ifstream file;
+  stringstream T;
   cout << "please specify input file: ";
   cin >> filename;
   cout << endl;
-  file.open(filename.c_str());
 
-  string T;
-  stringstream ss;
+  readFile(filename,T);
+
+/******** convert the input string T into an array of ints ******/
+  convertToInts(T);
+
+/******* Output content of Suffix Array ********/
+
+  return 0;
+}
+
+void readFile(string filename,stringstream &ss)
+{
+  //stringstream ss;
+  ifstream file(filename.c_str());
   if(file.is_open())
   {
     string line;
-    while( getline( file, line) )
+    while( getline( file,line))
     {
       ss << line;
     }
-    ss<<'$';
-    T=ss.str();
+    ss << '$';
   }
+  file.close();
+  //return ss;
+}
 
-  /******* convert the input string T into an array of ints ******/
-  vector <int>index(256,0);//will help find indexes for T
+void convertToInts(stringstream &T)
+{
+  vector<int>index(256,0);//will help find indexes for T
   vector<int>S;//holds indexes for string T
 
-  //scan T for each char ch
+  //scan T for each char c
   char c;
   int name=1;
-  while(ss.get(c))
+  while(T.get(c))
   {
     if(c != '$')
     {
@@ -68,8 +86,5 @@ int main()
     cout << S[i] << " ";
   }
 
-
   cout << endl;
-  file.close();
-  return 0;
 }
