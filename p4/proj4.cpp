@@ -92,31 +92,6 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
   printVector(B);
   int i=0;
   int Ssize=SA.size();
-  int p;
-  cout << "size of SA: " << SA.size() << endl;
-  cout << "size of B: " << B.size() << endl;
-  cout << "size of T: " << T.size() << endl;
-/*
-  for(vector<int>::iterator it=SA.begin();it != SA.end(); ++it)
-  {
-    p=*it;
-    if(p > -1){
-      p=p-1;
-      int j=T[p];
-      j=B[T[p]];
-      if(t[p]==0)
-      {
-        SA[j]=p;
-        cout << "p: " << p <<  ", j: " << j << "--->";
-        j=T[p];
-        cout << j << endl;
-        //B[j]=B[j]+1;
-      }
-    }
-    printVector(SA);
-    cout << endl;
-  }
-*/
 
   for(unsigned int i=0;i<SA.size();i++)
   {
@@ -139,6 +114,38 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
   cout << "(step1) SA: ";
   printVector(SA);
 
+  /**** Reset the vlues of B to point to the End of c-buckets ****/
+  B[B.size()-1]=SA.size()-1;
+  for(int i=B.size()-2;i>0;i--)
+  {
+    B[i]=B[i+1]-A[i+1];
+  }
+  cout << "B: ";
+  printVector(B);
+
+  /**** Induce the order of S-type suffixes from ordered L-type suffixes ****/
+  vector<int> L(SA.size());
+  for(int i=SA.size()-1;i>-1;i--)
+  {
+    int p=SA[i];
+    if(p>1)
+    {
+      if(t[p-1]==1)
+      {
+        SA[B[T[p-1]]]=p-1;
+        B[T[p-1]]=B[T[p-1]]-1;
+        if(t[p-2]==0)
+        {
+          L[B[T[p-1]]]=1;
+        }
+      }
+    }
+  }
+
+  cout << "(step1.d) SA: ";
+  printVector(SA);
+  cout << "L: ";
+  printVector(L);
 };
 
 int main()
