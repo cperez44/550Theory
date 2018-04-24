@@ -5,37 +5,20 @@
 using namespace std;
 
 void readFile(string filename,stringstream &ss);
-vector<int> convertToInts(stringstream &T, int &alphabetSize);
+vector<int> convertToInts(stringstream &S, int &alphabetSize);
 void printVector(vector<int> v)
 {
-  cout << v[0];
-  for(int i=1;i<v.size();i++)
-    cout << " " << v[i];
+  for(unsigned int i=0;i<v.size();i++)
+    cout << v[i] << " ";
   cout << endl;
-};
-void tableA(vector<int> &A, vector<int> &T)
-{
-  for(int i=0;i<T.size();i++)
-  {
-    A[T[i]]=A[T[i]]+1;
-  }
-
+  /*
+  for(unsigned int i=0;i<v.size(); i++)
+    cout << "i=" << i << ": " << v[i] << endl;
+  */
 }
-void tableC(vector<int> &C, vector<int> &A)
-{
-  for(int i=1;i<A.size();i++)
-  {
-    C[i]=C[i-1]+A[i-1];
-  }
-}
-void tableB(vector<int> &B, vector<int> &A, int Tsize)
-{
-  B[A.size()-1]=Tsize-1;
-  for(int i=A.size()-2;i>0;i--)
-  {
-    B[i]=B[i+1]-A[i+1];
-  }
-}
+void tableA(vector<int> &A, vector<int> &T);
+void tableC(vector<int> &C, vector<int> &A);
+void tableB(vector<int> &B, vector<int> &A, int Tsize);
 
 void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
 {
@@ -45,16 +28,10 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
   int Tsize=T.size();
 
   tableA(A,T);
-  cout << "A: ";
-  printVector(A);
 
   tableC(C,A);
-  cout << "C: ";
-  printVector(C);
 
   tableB(B,A,Tsize);
-  cout << "B: ";
-  printVector(B);
 
 /********* Step 0, assign type of each suffix in T *******/
   vector<bool> t(T.size());//L-type=0;S-type=1;
@@ -74,24 +51,12 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
     else //if left==right, same-types
       t[i]=t[i+1];
   }
-  cout << "t: ";
-  for(int i=0;i<t.size();i++)
-  {
-    cout << t[i] << " ";
-  }
 
-  cout << endl;
-  cout << "SA: ";
-  printVector(SA);
 /********Step 1, sort all LMS-substrings of T in O(n) time *******/
-  for(int i=0; i<B.size();i++)
+  for(unsigned int i=0; i<B.size();i++)
   {
     B[i]=C[i];
   }
-  cout << "(step1) B: ";
-  printVector(B);
-  int i=0;
-  int Ssize=SA.size();
 
   for(unsigned int i=0;i<SA.size();i++)
   {
@@ -110,9 +75,6 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
     }
   }
 
-  cout << endl;
-  cout << "(step1) SA: ";
-  printVector(SA);
 
   /**** Reset the vlues of B to point to the End of c-buckets ****/
   B[B.size()-1]=SA.size()-1;
@@ -120,52 +82,87 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
   {
     B[i]=B[i+1]-A[i+1];
   }
-  cout << "B: ";
-  printVector(B);
 
   /**** Induce the order of S-type suffixes from ordered L-type suffixes ****/
   vector<int> L(SA.size());
   for(int i=SA.size()-1;i>-1;i--)
   {
     int p=SA[i];
-    if(p>1)
+    if(p>-1)
     {
-      if(t[p-1]==1)
-      {
-        SA[B[T[p-1]]]=p-1;
-        B[T[p-1]]=B[T[p-1]]-1;
-        if(t[p-2]==0)
+      if(p==0){
+        if(t[T.size()-1]==1)
         {
-          L[B[T[p-1]]]=1;
+          SA[B[T[T.size()-1]]]=T.size()-1;
+          B[T[T.size()-1]]=B[T[T.size()-1]]-1;
+
+          if(t[T.size()-2]==0)
+          {
+            L[B[T[p]]]=1;
+          }
+
+        }
+      }
+      else if(p==1)
+      {
+        if(t[p-1]==1)
+        {
+          SA[B[T[p-1]]]=p-1;
+          B[T[p-1]]=B[T[p-1]]-1;
+
+
+          if(t[T.size()-1]==0)
+          {
+            L[B[T[p-1]]]=1;
+          }
+
+        }
+
+      }
+      else
+      {
+        if(t[p-1]==1)
+        {
+          SA[B[T[p-1]]]=p-1;
+          B[T[p-1]]=B[T[p-1]]-1;
+
+          if(t[p-2]==0)
+          {
+            L[B[T[p-1]]]=1;
+          }
         }
       }
     }
   }
-
-  cout << "(step1.d) SA: ";
   printVector(SA);
-  cout << "L: ";
-  printVector(L);
-};
+  //printVector(L);
+}
 
 int main()
 {
 /********  read in input file using cin  *******/
-  string filename;
-  stringstream T;
-  cout << "please specify input file: ";
-  cin >> filename;
-  cout << endl;
+  //string filename;
+  stringstream ss;
+  //cout << "please specify input file: ";
+  //cin >> filename;
+  //cout << endl;
 
-  readFile(filename,T);
+  //readFile(filename,ss);
+
+  string line;
+  while(getline(cin,line))
+  {
+    ss<<line;
+  }
+  //ss<<'$';
 
 /******** convert the input string T into an array of ints ******/
   int alphabetSize=0;
-  vector<int> S=convertToInts(T,alphabetSize);
+  vector<int> T=convertToInts(ss,alphabetSize);
 
 /******* Output content of Suffix Array ********/
-  vector<int> SA(S.size(),-1);//initialize SA to -1
-  SAIS(S,SA,alphabetSize);
+  vector<int> SA(T.size(),-1);//initialize SA to -1
+  SAIS(T,SA,alphabetSize);
 
   return 0;
 }
@@ -187,45 +184,64 @@ void readFile(string filename,stringstream &ss)
     {
       ss << line;
     }
-    ss << '$';
+    //ss << '$';
   }
   file.close();
+
   //return ss;
 }
 
-vector<int> convertToInts(stringstream &T, int &alphabetSize)
+vector<int> convertToInts(stringstream &S, int &alphabetSize)
 {
   vector<int>index(256,0);//will help find indexes for T
-  vector<int>S;//holds indexes for string T
+  vector<int>T;//holds indexes for string T
 
   //scan T for each char c
   char c;
   int name=1;
-  while(T.get(c))
+  while(S.get(c))
   {
-    if(c != '$')
-    {
      index[c]=name;
-     S.push_back(c);//holds ASCII value to be used later
-    }
+     T.push_back(c);//holds ASCII value to be used later
   }
-  S.push_back(0);//index value for $
-
   //scan index from L-to-R
-  for(int i=0; i < index.size();i++)
+  for(unsigned int i=0; i < index.size();i++)
   {
     if(index[i]>0)
     {
       index[i]=name++;
     }
   }
-  //scan array of int S
-  for(int i=0; i < S.size();i++)
+  //scan array of int T
+  for(unsigned int i=0; i < T.size();i++)
   {
-    S[i]=index[S[i]];
+    T[i]=index[T[i]];
   }
-  cout << "T: ";
-  printVector(S);//ERROR CHECKING
+
+  T.push_back(0);
   alphabetSize=name;
-  return S;
+  return T;
+}
+void tableA(vector<int> &A, vector<int> &T)
+{
+  for(unsigned int i=0;i<T.size();i++)
+  {
+    A[T[i]]=A[T[i]]+1;
+  }
+
+}
+void tableC(vector<int> &C, vector<int> &A)
+{
+  for(unsigned int i=1;i<A.size();i++)
+  {
+    C[i]=C[i-1]+A[i-1];
+  }
+}
+void tableB(vector<int> &B, vector<int> &A, int Tsize)
+{
+  B[A.size()-1]=Tsize-1;
+  for(int i=A.size()-2;i>0;i--)
+  {
+    B[i]=B[i+1]-A[i+1];
+  }
 }
