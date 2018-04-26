@@ -85,6 +85,17 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
 
   /**** Induce the order of S-type suffixes from ordered L-type suffixes ****/
   vector<int> L(SA.size());
+  /*
+  cout << "T: ";
+  printVector(T);
+  cout << "t:";
+  for(int j=0;j<t.size();j++)
+  {
+    cout << " " << t[j];
+  }
+  cout << endl;
+  printVector(SA);
+  */
   for(int i=SA.size()-1;i>-1;i--)
   {
     int p=SA[i];
@@ -94,13 +105,12 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
         if(t[T.size()-1]==1)
         {
           SA[B[T[T.size()-1]]]=T.size()-1;
-          B[T[T.size()-1]]=B[T[T.size()-1]]-1;
 
           if(t[T.size()-2]==0)
           {
-            L[B[T[p]]]=1;
+            L[B[T[T.size()-1]]]=1;
           }
-
+          B[T[T.size()-1]]=B[T[T.size()-1]]-1;
         }
       }
       else if(p==1)
@@ -108,14 +118,12 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
         if(t[p-1]==1)
         {
           SA[B[T[p-1]]]=p-1;
-          B[T[p-1]]=B[T[p-1]]-1;
-
 
           if(t[T.size()-1]==0)
           {
             L[B[T[p-1]]]=1;
           }
-
+          B[T[p-1]]=B[T[p-1]]-1;
         }
 
       }
@@ -124,18 +132,20 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
         if(t[p-1]==1)
         {
           SA[B[T[p-1]]]=p-1;
-          B[T[p-1]]=B[T[p-1]]-1;
 
           if(t[p-2]==0)
           {
             L[B[T[p-1]]]=1;
           }
+          B[T[p-1]]=B[T[p-1]]-1;
         }
       }
     }
   }
   printVector(SA);
-  //printVector(L);
+  printVector(L);
+/** Step 2: Give each LMS-substring of T a name and contruct shortened str T1 **/
+
 }
 
 int main()
