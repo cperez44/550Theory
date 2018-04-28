@@ -19,6 +19,7 @@ void printVector(vector<int> v)
 void tableA(vector<int> &A, vector<int> &T);
 void tableC(vector<int> &C, vector<int> &A);
 void tableB(vector<int> &B, vector<int> &A, int Tsize);
+bool identical(vector<int> &T, vector<bool> t,int current, int previous);
 
 void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
 {
@@ -144,7 +145,38 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
   }
   printVector(SA);
   printVector(L);
-/** Step 2: Give each LMS-substring of T a name and contruct shortened str T1 **/
+/** Step 2: Give each LMS-substring of T a name and construct shortened str T1 **/
+  vector<int> T1;
+  vector<int> N(T.size(),-1);//initialize N[0...n]=-1
+  //a)
+  N[T.size()-1]=0;//initialize N[n]=0, m=0 for $
+  int m=0;
+  int previous=SA[0];//initially previous is set to SA[0]
+  for(unsigned int i= 1; i<SA.size();i++)
+  {
+    if(L[i]==1)
+    {
+      int p=SA[i];
+      if(identical(T,t,p,previous)==true){
+        N[p]=m;
+        previous=SA[i];
+      }
+      else
+      {
+        m++;
+        N[p]=m;
+        previous=SA[i];
+      }
+    }
+  }
+  cout << "N: ";
+  printVector(N);
+  for(unsigned int i=0;i<N.size();i++)
+  {
+    if(N[i] != -1)
+      T1.push_back(N[i]);
+  }
+  printVector(T1);
 
 }
 
@@ -254,4 +286,37 @@ void tableB(vector<int> &B, vector<int> &A, int Tsize)
   {
     B[i]=B[i+1]-A[i+1];
   }
+}
+bool identical(vector<int> &T, vector<bool> t,int current, int previous)
+{
+  bool ident=true;
+  cout << endl;
+  cout << "this is current="<<current << "  this is previous="<<previous;
+  if(T[current] != T[previous] || t[current] != t[previous])//this will prevent comparing with $(the end one, not the one in the string)
+  {
+    ident=false;//fails if first characters not the same in char and type
+  }
+  else if(T[current+1] != T[previous +1] || t[current+1] != t[previous+1]){
+    ident=false;
+  }
+  else
+  {
+    current++;
+    previous++;
+    while(t[current]>=t[current-1] && t[previous]>=t[previous-1])
+    {
+        cout << " T[current]=" << T[current]<< "   T[previous]=" << T[previous];
+        if(T[current] != T[previous])
+        {
+          cout << " this occurs for current: " << current << " ;;;; previous: ";
+          ident=false;//will execute if the characters are not the same
+        }
+        //cout << endl;
+        current++;
+        previous++;
+    }
+  }
+  cout << " returning: "<< ident << endl;
+  cout << endl;
+  return ident;
 }
