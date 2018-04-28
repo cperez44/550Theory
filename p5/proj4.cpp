@@ -19,10 +19,34 @@ void printVector(vector<int> v)
 void tableA(vector<int> &A, vector<int> &T);
 void tableC(vector<int> &C, vector<int> &A);
 void tableB(vector<int> &B, vector<int> &A, int Tsize);
+void resetB(vector<int> &B, vector<int> &A, vector<int> &SA);
 bool identical(vector<int> &T, vector<bool> t,int current, int previous);
 
-void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
+void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize, int iteration)
 {
+  //BASE CASE
+  cout << "Iteration " << iteration << endl;
+  cout << "T at iteration " << iteration << endl;
+  printVector(T);
+  bool different=false;
+  int max=0;
+  //if(T.size() != 1)
+  //{
+    for(unsigned int i=0;i<T.size();i++)
+    {
+      if(T[i]>max)//if all are 1, then all are same characters excluding $
+        max=T[i];
+    }
+  //}
+  //cout << "asize: " << alphabetSize << " ;;;; " << "max: "<< max << endl;
+  if( alphabetSize==(max+1) && T.size()==(max+1) ){//true if ALL characters different, no reps
+    for(unsigned int i=0;i<T.size();i++)
+    {
+      SA[ T[i] ] = i;
+    }
+    cout << endl;
+    return;
+  }
   vector<int> A(alphabetSize,0);
   vector<int> B(alphabetSize,0);
   vector<int> C(alphabetSize,0);
@@ -78,25 +102,11 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
 
 
   /**** Reset the vlues of B to point to the End of c-buckets ****/
-  B[B.size()-1]=SA.size()-1;
-  for(int i=B.size()-2;i>0;i--)
-  {
-    B[i]=B[i+1]-A[i+1];
-  }
+  resetB(B,A,SA);
 
   /**** Induce the order of S-type suffixes from ordered L-type suffixes ****/
   vector<int> L(SA.size());
-  /*
-  cout << "T: ";
-  printVector(T);
-  cout << "t:";
-  for(int j=0;j<t.size();j++)
-  {
-    cout << " " << t[j];
-  }
-  cout << endl;
-  printVector(SA);
-  */
+
   for(int i=SA.size()-1;i>-1;i--)
   {
     int p=SA[i];
@@ -143,15 +153,17 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
       }
     }
   }
+  cout << "LMS prefixes are sorted." << endl;
+  cout << "SA at iteration " << iteration << endl;
   printVector(SA);
-  printVector(L);
+
 /** Step 2: Give each LMS-substring of T a name and construct shortened str T1 **/
   vector<int> T1;
   vector<int> N(T.size(),-1);//initialize N[0...n]=-1
   //a)
   N[T.size()-1]=0;//initialize N[n]=0, m=0 for $
   int m=0;
-  int previous=SA[0];//initially previous is set to SA[0]
+  int previous=SA[0];//initially, previous is set to SA[0]
   for(unsigned int i= 1; i<SA.size();i++)
   {
     if(L[i]==1)
@@ -169,6 +181,7 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
       }
     }
   }
+  //c) Fill in T1
   cout << "N: ";
   printVector(N);
   for(unsigned int i=0;i<N.size();i++)
@@ -176,8 +189,26 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize)
     if(N[i] != -1)
       T1.push_back(N[i]);
   }
+  cout << "T1 at iteration " << iteration << endl;
   printVector(T1);
+/****** Step 3: Call recursively SA-IS on T1 to calculate the SA1 for T1 *****/
+  vector<int> SA1(T1.size());
+  cout << "Iteration " << iteration << ". Recursive call on T1." << endl;
+  cout << "********************************************" << endl;
+  SAIS(T1,SA1,m+1,iteration+1);
 
+/*************** Step 4: Induce SA from SA1 in O(n) time. ********************/
+  //resetB(B,A,SA);//a) reset B to point to END of buckets
+  /*
+  for(unsigned int i=0;i<SA.size();i++)//b) reset SA all to -1
+    SA[i]=-1;
+    */
+  cout << "********************************************" << endl;
+  cout << "After recursive call inside iteration " << iteration << endl;
+  cout << "SA1 at iteration " << iteration << " (after recursive call) is:" << endl;
+  printVector(SA1);
+  cout << "SA at the end of SAIS function just before the return at iteration " << iteration << endl;
+  printVector(SA);
 }
 
 int main()
@@ -204,7 +235,7 @@ int main()
 
 /******* Output content of Suffix Array ********/
   vector<int> SA(T.size(),-1);//initialize SA to -1
-  SAIS(T,SA,alphabetSize);
+  SAIS(T,SA,alphabetSize,1);
 
   return 0;
 }
@@ -287,11 +318,17 @@ void tableB(vector<int> &B, vector<int> &A, int Tsize)
     B[i]=B[i+1]-A[i+1];
   }
 }
+void resetB(vector<int> &B, vector<int> &A, vector<int> &SA)
+{
+  B[B.size()-1]=SA.size()-1;
+  for(int i=B.size()-2;i>0;i--)
+  {
+    B[i]=B[i+1]-A[i+1];
+  }
+}
 bool identical(vector<int> &T, vector<bool> t,int current, int previous)
 {
   bool ident=true;
-  cout << endl;
-  cout << "this is current="<<current << "  this is previous="<<previous;
   if(T[current] != T[previous] || t[current] != t[previous])//this will prevent comparing with $(the end one, not the one in the string)
   {
     ident=false;//fails if first characters not the same in char and type
@@ -303,20 +340,19 @@ bool identical(vector<int> &T, vector<bool> t,int current, int previous)
   {
     current++;
     previous++;
-    while(t[current]>=t[current-1] && t[previous]>=t[previous-1])
+    while(t[current]<=t[current-1] && t[previous]<=t[previous-1])
     {
-        cout << " T[current]=" << T[current]<< "   T[previous]=" << T[previous];
         if(T[current] != T[previous])
         {
-          cout << " this occurs for current: " << current << " ;;;; previous: ";
           ident=false;//will execute if the characters are not the same
         }
-        //cout << endl;
         current++;
         previous++;
     }
+    if(T[current] != T[previous] || t[current] != t[previous])
+    {
+      ident=false;//final check if loop made it to the end
+    }
   }
-  cout << " returning: "<< ident << endl;
-  cout << endl;
   return ident;
 }
