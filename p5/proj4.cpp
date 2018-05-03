@@ -182,8 +182,8 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize, int iteration)
     }
   }
   //c) Fill in T1
-  cout << "N: ";
-  printVector(N);
+  //cout << "N: ";
+  //printVector(N);
   for(unsigned int i=0;i<N.size();i++)
   {
     if(N[i] != -1)
