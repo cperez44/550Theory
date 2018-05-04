@@ -78,7 +78,7 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize, int iteration)
   }
 
 /********Step 1, sort all LMS-substrings of T in O(n) time *******/
-  for(unsigned int i=0; i<B.size();i++)
+  for(unsigned int i=0; i<B.size();i++)//reset B to head of c-bucket
   {
     B[i]=C[i];
   }
@@ -198,17 +198,123 @@ void SAIS(vector<int> &T, vector<int> &SA, int alphabetSize, int iteration)
   SAIS(T1,SA1,m+1,iteration+1);
 
 /*************** Step 4: Induce SA from SA1 in O(n) time. ********************/
-  //resetB(B,A,SA);//a) reset B to point to END of buckets
-  /*
-  for(unsigned int i=0;i<SA.size();i++)//b) reset SA all to -1
-    SA[i]=-1;
-    */
+
   cout << "********************************************" << endl;
   cout << "After recursive call inside iteration " << iteration << endl;
   cout << "SA1 at iteration " << iteration << " (after recursive call) is:" << endl;
   printVector(SA1);
+  if(SA1.size()!=1)
+  {
+    resetB(B,A,SA);//a) reset B to point to END of buckets
+    //cout << "B: ";
+    //printVector(B);
+    for(unsigned int i=0;i<SA.size();i++)//b) reset SA all to -1
+      SA[i]=-1;
+    for(unsigned int j=1, i=0;j<t.size();j++)//c)
+    {
+      if(t[j-1]==0 && t[j]==1){
+        T1[i]=j;
+        i++;
+      }
+    }
+    //cout << "T1: ";
+    //printVector(T1);
+
+    for(int j=(SA1.size()-1), i=0;j>=0;j--)//Scan SA1 from R-to-L
+    {
+        i=SA1[j];
+        //cout << "for j="<<j<<": i=" << i;
+        int p=T1[i];
+        //cout << ", T1[i]=p=" << p;
+        SA[ B[ T[p] ] ]=p;
+        //cout << ", B[ T[p] ]=" << B[ T[p] ];
+        //cout << ", SA[ B[ T[p] ] ]=p="<< SA[B [ T[p] ] ];
+        B[ T[p] ]=B[ T[p] ] -1;
+        //cout << endl;
+    }
+    /********** Repeat induce-sort of L-type and S-type suffixes from
+    Step 1 to obtain final SA of T **************/
+    for(unsigned int i=0; i<B.size();i++)//reset B to head of c-bucket
+    {
+      B[i]=C[i];
+    }
+
+    for(unsigned int i=0;i<SA.size();i++)
+    {
+      int p=SA[i];
+      if(p > 0 || i==0)
+      {
+        p=p-1;
+        int j=T[p];
+        j=B[T[p]];
+        if(t[p]==0)
+        {
+          SA[j]=p;
+          j=T[p];
+          B[j]=B[j]+1;
+        }
+      }
+    }
+
+
+    /**** Reset the vlues of B to point to the End of c-buckets ****/
+    resetB(B,A,SA);
+
+    /**** Induce the order of S-type suffixes from ordered L-type suffixes ****/
+    vector<int> L(SA.size());
+
+    for(int i=SA.size()-1;i>-1;i--)
+    {
+      int p=SA[i];
+      if(p>-1)
+      {
+        if(p==0){
+          if(t[T.size()-1]==1)
+          {
+            SA[B[T[T.size()-1]]]=T.size()-1;
+
+            if(t[T.size()-2]==0)
+            {
+              L[B[T[T.size()-1]]]=1;
+            }
+            B[T[T.size()-1]]=B[T[T.size()-1]]-1;
+          }
+        }
+        else if(p==1)
+        {
+          if(t[p-1]==1)
+          {
+            SA[B[T[p-1]]]=p-1;
+
+            if(t[T.size()-1]==0)
+            {
+              L[B[T[p-1]]]=1;
+            }
+            B[T[p-1]]=B[T[p-1]]-1;
+          }
+
+        }
+        else
+        {
+          if(t[p-1]==1)
+          {
+            SA[B[T[p-1]]]=p-1;
+
+            if(t[p-2]==0)
+            {
+              L[B[T[p-1]]]=1;
+            }
+            B[T[p-1]]=B[T[p-1]]-1;
+          }
+        }
+      }
+    }
+  }
+
+
   cout << "SA at the end of SAIS function just before the return at iteration " << iteration << endl;
   printVector(SA);
+  cout << endl;
 }
 
 int main()
@@ -321,7 +427,7 @@ void tableB(vector<int> &B, vector<int> &A, int Tsize)
 void resetB(vector<int> &B, vector<int> &A, vector<int> &SA)
 {
   B[B.size()-1]=SA.size()-1;
-  for(int i=B.size()-2;i>0;i--)
+  for(int i=B.size()-2;i>=0;i--)
   {
     B[i]=B[i+1]-A[i+1];
   }
